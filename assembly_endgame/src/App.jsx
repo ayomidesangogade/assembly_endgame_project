@@ -3,13 +3,17 @@ import { languages } from "./languages";
 
 function AssemblyEndgame() {
   const [currentWord, setCurrentWord] = useState("react")
+  const [guessedLetterArray, setGuessedLetterArray] = useState([])
 
   const alphabets = "abcdefghijklmnopqrstuvwxyz"
 
-  // function lagata() {
-  //   console.log(currentWord.split(""))
-  // }
-  // console.log(lagata())
+  function holdGuessedLetters(letter) {
+    setGuessedLetterArray(prev => 
+      prev.includes(letter) ? 
+      prev : [...prev, letter]
+    )
+  }
+  console.log(guessedLetterArray)
   return (
     <main>
       <header>
@@ -42,6 +46,7 @@ function AssemblyEndgame() {
         {alphabets.split("").map((letter) => 
           <button 
             key={letter}
+            onClick={() => holdGuessedLetters(letter)}
           >
             {letter.toUpperCase()}
           </button>)}
