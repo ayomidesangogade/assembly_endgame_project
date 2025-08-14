@@ -1,35 +1,54 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { React, useState } from "react"
+import { languages } from "./languages";
 
-function App() {
-  const [count, setCount] = useState(0)
+function AssemblyEndgame() {
+  const [currentWord, setCurrentWord] = useState("react")
 
+  const alphabets = "abcdefghijklmnopqrstuvwxyz"
+
+  // function lagata() {
+  //   console.log(currentWord.split(""))
+  // }
+  // console.log(lagata())
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <main>
+      <header>
+        <h1>Assembly: Endgame</h1>
+        <p>Guess the word within 8 attempts to keep the programming world safe from Assembly!</p>
+      </header>
+      <div className="game-status">
+        <h2>You win!</h2>
+        <p>Well done! 🎉</p>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
+      <div className="language-chips">
+        {languages.map((lang) => 
+          <span 
+            key={lang.name} 
+            className="chip" 
+            style={{backgroundColor: lang.backgroundColor, color: lang.color}}
+          >
+            {lang.name}
+          </span>)}
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+      <div className="word">
+          {currentWord.split("").map((letter, index) =>
+            <span 
+              key={index}
+            >
+              {letter.toUpperCase()}
+            </span>)}
+      </div>
+      <div className="keyboard">
+        {alphabets.split("").map((letter) => 
+          <button 
+            key={letter}
+          >
+            {letter.toUpperCase()}
+          </button>)}
+      </div>
+      <button className="new-game">New Game</button>
+    </main>
   )
 }
 
-export default App
+export default AssemblyEndgame;
