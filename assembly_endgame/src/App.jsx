@@ -1,4 +1,5 @@
 import { React, useState } from "react"
+import { clsx } from "clsx"
 import { languages } from "./languages";
 
 function AssemblyEndgame() {
@@ -35,21 +36,39 @@ function AssemblyEndgame() {
           </span>)}
       </div>
       <div className="word">
-          {currentWord.split("").map((letter, index) =>
-            <span 
-              key={index}
-            >
-              {letter.toUpperCase()}
-            </span>)}
+          {currentWord.split("").map((letter, index) => {
+            const isGuessed = guessedLetterArray.includes(letter)
+            const isCorrect = isGuessed && currentWord.includes(letter)
+            
+            return (
+              <span
+                style={{display: isCorrect ? "inherit" : "none"}}
+                key={index}
+              >
+                {letter.toUpperCase()}
+              </span>
+            )
+            })}
       </div>
       <div className="keyboard">
-        {alphabets.split("").map((letter) => 
-          <button 
-            key={letter}
-            onClick={() => holdGuessedLetters(letter)}
-          >
-            {letter.toUpperCase()}
-          </button>)}
+        {alphabets.split("").map((letter) => {
+          const isGuessed = guessedLetterArray.includes(letter)
+          const isCorrect = isGuessed && currentWord.includes(letter)
+          const isWrong = isGuessed && !currentWord.includes(letter)
+          const className = clsx({
+            correct: isCorrect,
+            wrong: isWrong
+          })
+            return (
+              <button 
+                key={letter}
+                className={className}
+                onClick={() => holdGuessedLetters(letter)}
+              >
+                {letter.toUpperCase()}
+              </button>
+            )
+        })}
       </div>
       <button className="new-game">New Game</button>
     </main>
