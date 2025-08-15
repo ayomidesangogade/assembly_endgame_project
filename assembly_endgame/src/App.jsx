@@ -42,10 +42,9 @@ function AssemblyEndgame() {
             
             return (
               <span
-                style={{display: isCorrect ? "inherit" : "none"}}
                 key={index}
               >
-                {letter.toUpperCase()}
+                {isCorrect ? letter.toUpperCase() : ""}
               </span>
             )
             })}
