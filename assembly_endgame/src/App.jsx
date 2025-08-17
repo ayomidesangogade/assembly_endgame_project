@@ -1,5 +1,6 @@
 import { React, useState } from "react"
 import { clsx } from "clsx"
+import { getFarewellText } from "./utils";
 import { languages } from "./languages";
 
 function AssemblyEndgame() {
@@ -7,7 +8,7 @@ function AssemblyEndgame() {
   const [guessedLetterArray, setGuessedLetterArray] = useState([])
 
   const wrongGuessCount = guessedLetterArray.filter(letter => !currentWord.includes(letter)).length
-  const isGameLost = wrongGuessCount >= languages.length
+  const isGameLost = wrongGuessCount >= languages.length - 1
   const isGameWon = currentWord.split("").every(letter => guessedLetterArray.includes(letter))
   const isGameOver = isGameLost || isGameWon
 
@@ -20,6 +21,37 @@ function AssemblyEndgame() {
     )
   }
 
+  const wrongGuessArray = guessedLetterArray.filter(letter => !currentWord.includes(letter))
+  const array = []
+  wrongGuessArray.map((message, index) => {
+    array.push(getFarewellText(languages[index].name))
+  })
+  function renderGameStatus() {
+    if (!isGameOver) {
+      return (
+        <>
+          {array[array.length-1]}
+        </>
+      )
+    }
+
+    if (isGameWon) {
+      return (
+        <>
+          <h2>You win!</h2>
+          <p>Well done! 🎉</p>
+        </>
+      )
+    } else {
+      return (
+        <>
+          <h2>Game over!</h2>
+          <p>You lose! Better start learning Assembly 😭</p>
+        </>
+      )
+    }
+  }
+
   const gameStatusClass = clsx("game-status", {won: isGameWon, lost: isGameLost})
   
   return (
@@ -29,22 +61,7 @@ function AssemblyEndgame() {
         <p>Guess the word within 8 attempts to keep the programming world safe from Assembly!</p>
       </header>
       <div className={gameStatusClass}>
-      {isGameWon && !isGameLost 
-         ?
-            <>
-              <h2>You win!</h2>
-              <p>Well done! 🎉</p>
-            </>
-          :
-          isGameLost
-          ?
-            <>
-              <h2>Game over!</h2>
-              <p>You lose! Better start learning Assembly 😭</p>
-            </>
-          :
-            undefined
-      }
+        {renderGameStatus()}
       </div>
       <div className="language-chips">
         {languages.map((lang, index) => {
