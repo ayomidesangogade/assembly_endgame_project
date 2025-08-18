@@ -2,6 +2,8 @@ import { React, useState } from "react"
 import { clsx } from "clsx"
 import { getFarewellText, getRandomWord } from "./utils";
 import { languages } from "./languages";
+import Confetti from "react-confetti";
+import { useWindowSize } from "react-use";
 
 function AssemblyEndgame() {
   const [currentWord, setCurrentWord] = useState(() => getRandomWord())
@@ -64,9 +66,12 @@ function AssemblyEndgame() {
       farewell: !isGameOver && isLastGuessIncorrect
     }
   )
+
+  const { width, height } = useWindowSize();
   
   return (
     <main>
+      {isGameWon && <Confetti width={width} height={height} />}
       <header>
         <h1>Assembly: Endgame</h1>
         <p>Guess the word within 8 attempts to keep the programming world safe from Assembly!</p>
@@ -95,12 +100,13 @@ function AssemblyEndgame() {
           {currentWord.split("").map((letter, index) => {
             const isGuessed = guessedLetterArray.includes(letter)
             const isCorrect = isGuessed && currentWord.includes(letter)
-            
+            const className = clsx(isGameLost && !guessedLetterArray.includes(letter) && "missed-letter")
             return (
               <span
                 key={index}
+                className={className}
               >
-                {isCorrect ? letter.toUpperCase() : ""}
+                {!isGameLost ? isCorrect ? letter.toUpperCase() : "" : letter.toUpperCase()}
               </span>
             )
             })}
