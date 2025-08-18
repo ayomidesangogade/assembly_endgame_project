@@ -1,16 +1,18 @@
 import { React, useState } from "react"
 import { clsx } from "clsx"
-import { getFarewellText } from "./utils";
+import { getFarewellText, getRandomWord } from "./utils";
 import { languages } from "./languages";
 
 function AssemblyEndgame() {
-  const [currentWord, setCurrentWord] = useState("react")
+  const [currentWord, setCurrentWord] = useState(() => getRandomWord())
   const [guessedLetterArray, setGuessedLetterArray] = useState([])
 
   const wrongGuessCount = guessedLetterArray.filter(letter => !currentWord.includes(letter)).length
   const isGameLost = wrongGuessCount >= languages.length - 1
   const isGameWon = currentWord.split("").every(letter => guessedLetterArray.includes(letter))
   const isGameOver = isGameLost || isGameWon
+  const lastGuessedLetter = guessedLetterArray[guessedLetterArray.length - 1]
+  const isLastGuessIncorrect = lastGuessedLetter && !currentWord.includes(lastGuessedLetter)
 
   const alphabets = "abcdefghijklmnopqrstuvwxyz"
 
@@ -21,17 +23,17 @@ function AssemblyEndgame() {
     )
   }
 
-  const wrongGuessArray = guessedLetterArray.filter(letter => !currentWord.includes(letter))
-  const array = []
-  wrongGuessArray.map((message, index) => {
-    array.push(getFarewellText(languages[index].name))
-  })
+  function resetGame() {
+    setCurrentWord(getRandomWord())
+    setGuessedLetterArray([])
+  }
+
   function renderGameStatus() {
-    if (!isGameOver) {
+    if (!isGameOver && isLastGuessIncorrect) {
       return (
-        <>
-          {array[array.length-1]}
-        </>
+        <p className="farewell-message">
+          {getFarewellText(languages[wrongGuessCount - 1].name)}
+        </p>
       )
     }
 
@@ -42,7 +44,8 @@ function AssemblyEndgame() {
           <p>Well done! 🎉</p>
         </>
       )
-    } else {
+    } 
+    if (isGameLost) {
       return (
         <>
           <h2>Game over!</h2>
@@ -50,9 +53,17 @@ function AssemblyEndgame() {
         </>
       )
     }
+
+    return null
   }
 
-  const gameStatusClass = clsx("game-status", {won: isGameWon, lost: isGameLost})
+  const gameStatusClass = clsx("game-status", 
+    {
+      won: isGameWon, 
+      lost: isGameLost, 
+      farewell: !isGameOver && isLastGuessIncorrect
+    }
+  )
   
   return (
     <main>
@@ -60,7 +71,11 @@ function AssemblyEndgame() {
         <h1>Assembly: Endgame</h1>
         <p>Guess the word within 8 attempts to keep the programming world safe from Assembly!</p>
       </header>
-      <div className={gameStatusClass}>
+      <div 
+        aria-live="polite"
+        className={gameStatusClass}
+        role="status"
+      >
         {renderGameStatus()}
       </div>
       <div className="language-chips">
@@ -90,6 +105,24 @@ function AssemblyEndgame() {
             )
             })}
       </div>
+
+      {/* Combined visually-hidden aria-live region for status updates */}
+      <div
+        className="sr-only"
+        role="status"
+        aria-live="polite"
+      >
+        <p>
+          {currentWord.includes(lastGuessedLetter) ?
+            `Good guess! The letter ${lastGuessedLetter} is in the word.` :
+            `Sorry, the letter ${lastGuessedLetter} is not in the word.`
+          }
+          You have {8 - wrongGuessCount} attempts left.
+        </p>
+        <p>
+          Current word: {currentWord.split("").map(letter => guessedLetterArray.includes(letter) ? letter + "." : "blank.").join(" ")}
+        </p>
+      </div>
       <div className="keyboard">
         {alphabets.split("").map((letter) => {
           const isGuessed = guessedLetterArray.includes(letter)
@@ -103,6 +136,9 @@ function AssemblyEndgame() {
               <button 
                 key={letter}
                 className={className}
+                disabled={isGameOver}
+                aria-disabled={guessedLetterArray.includes(letter)}
+                aria-label={`Letter ${letter}`}
                 onClick={() => holdGuessedLetters(letter)}
               >
                 {letter.toUpperCase()}
@@ -110,7 +146,7 @@ function AssemblyEndgame() {
             )
         })}
       </div>
-      {isGameOver && <button className="new-game">New Game</button>}
+      {isGameOver && <button className="new-game" onClick={resetGame}>New Game</button>}
     </main>
   )
 }
