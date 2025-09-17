@@ -1,4 +1,4 @@
-import { React, useState } from "react"
+import { React, useState, useRef, useEffect } from "react"
 import { clsx } from "clsx"
 import { getFarewellText, getRandomWord } from "./utils";
 import { languages } from "./languages";
@@ -6,11 +6,15 @@ import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
 
 function AssemblyEndgame() {
-  const [currentWord, setCurrentWord] = useState(() => getRandomWord())
-  const [guessedLetterArray, setGuessedLetterArray] = useState([])
+  const wordObject = getRandomWord();
+  const [currentWord, setCurrentWord] = useState(wordObject.word);
+  const [currentMeaning, setCurrentMeaning] = useState(wordObject.meaning);
+  const [guessedLetterArray, setGuessedLetterArray] = useState([]);
+  const [timer, setTimer] = useState(60);
+  const [timerStarted, setTimerStarted] = useState(false);
 
   const wrongGuessCount = guessedLetterArray.filter(letter => !currentWord.includes(letter)).length
-  const isGameLost = wrongGuessCount >= languages.length - 1
+  const isGameLost = wrongGuessCount >= languages.length - 1 || timer === 0;
   const isGameWon = currentWord.split("").every(letter => guessedLetterArray.includes(letter))
   const isGameOver = isGameLost || isGameWon
   const lastGuessedLetter = guessedLetterArray[guessedLetterArray.length - 1]
@@ -19,15 +23,38 @@ function AssemblyEndgame() {
   const alphabets = "abcdefghijklmnopqrstuvwxyz"
 
   function holdGuessedLetters(letter) {
+    if (!timerStarted) setTimerStarted(true);
     setGuessedLetterArray(prev => 
       prev.includes(letter) ? 
       prev : [...prev, letter]
     )
   }
 
+  const timerRef = useRef();
+
+  useEffect(() => {
+    if (!timerStarted || isGameOver) {
+      clearInterval(timerRef.current);
+      return;
+    }
+    timerRef.current = setInterval(() => {
+      setTimer(prev => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timerRef.current);
+  }, [timerStarted, isGameOver]);
+
   function resetGame() {
-    setCurrentWord(getRandomWord())
-    setGuessedLetterArray([])
+    setCurrentWord(wordObject.word);
+    setCurrentMeaning(wordObject.meaning);
+    setGuessedLetterArray([]);
+    setTimer(60);
+    setTimerStarted(false);
   }
 
   function renderGameStatus() {
@@ -74,7 +101,13 @@ function AssemblyEndgame() {
       {isGameWon && <Confetti width={width} height={height} />}
       <header>
         <h1>Assembly: Endgame</h1>
-        <p>Guess the word within 8 attempts to keep the programming world safe from Assembly!</p>
+        <p>Guess the word within 8 attempts or 60 seconds to keep the programming world safe from Assembly!</p>
+        <div
+          className="timer"
+          data-warning={timer <= 10}
+        >
+          ⏰   Time left: {timer}s
+        </div>
       </header>
       <div 
         aria-live="polite"
@@ -96,6 +129,7 @@ function AssemblyEndgame() {
               {lang.name}
             </span>)})}
       </div>
+      <div className="hint">Hint: {currentMeaning}</div>
       <div className="word">
           {currentWord.split("").map((letter, index) => {
             const isGuessed = guessedLetterArray.includes(letter)

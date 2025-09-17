@@ -1,8 +1,8 @@
-import { words } from "./words"
+import { wordsWithMeanings } from "./wordsWithMeanings";
 
 export function getRandomWord() {
-    const randomIndex = Math.floor(Math.random() * words.length);
-    return words[randomIndex];
+    const randomIndex = Math.floor(Math.random() * wordsWithMeanings.length);
+    return wordsWithMeanings[randomIndex];
 }
 
 export function getFarewellText(language) {
